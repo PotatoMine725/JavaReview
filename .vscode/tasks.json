@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build and Run Java Project",
+      "type": "shell",
+      "command": "chcp 65001 && javac -d bin src\\*.java && java -cp bin -Dfile.encoding=UTF-8 Main",
+      "options": {
+        "shell": {
+          "executable": "cmd.exe"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}
