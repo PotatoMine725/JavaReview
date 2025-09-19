@@ -15,8 +15,6 @@ public class KhuPho {
 	}
 
 	public void nhapDanhSach(Scanner sc) {
-		HoDan hoDan;
-
 		System.out.print("Nhap vao so ho dan: ");
 		int soHoDan = sc.nextInt();
 		sc.nextLine();
@@ -24,16 +22,14 @@ public class KhuPho {
 		System.out.println("Nhap vao thong tin cho tung ho dan:");
 		for (int i = 0; i < soHoDan; i++) {
 			System.out.println("Ho dan thu " + (i + 1) + " la:");
-			hoDan = new HoDan();
+			HoDan hoDan = new HoDan();
 			hoDan.nhapThongTin(sc);
 			themHoDan(hoDan);
 		}
 	}
 
 	public void hienThiDanhSach() {
-		int n = dshd.size();
-
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < dshd.size(); i++) {
 			System.out.println("Ho dan thu " + (i + 1) + " la:");
 			dshd.get(i).hienThiThongTin();
 		}
@@ -43,13 +39,14 @@ public class KhuPho {
 		Date now = new Date();
 		int namHienTai = now.getYear() + 1900;
 
-		Nguoi[] dstv = null;
-
 		for (HoDan hoDan : dshd) {
-			dstv = hoDan.getList();
-			for (int i = 0; i < hoDan.getSoNguoi(); i++) {
-				if (namHienTai - (dstv[i].getNgaySinh().getYear() + 1900) == 80) {
+			ArrayList<NguoiDan> dstv = hoDan.getList();
+			for (NguoiDan nguoi : dstv) {
+				int namSinh = nguoi.getNgaySinh().getYear() + 1900;
+				if (namHienTai - namSinh == 80) {
+					System.out.println("Tim thay nguoi 80 tuoi trong ho dan:");
 					hoDan.hienThiThongTin();
+					break; // Nếu chỉ cần hiển thị một lần cho mỗi hộ
 				}
 			}
 		}

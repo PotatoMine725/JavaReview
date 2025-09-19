@@ -3,17 +3,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
-public class Nguoi {
+public class NguoiDan {
 
 	private String hoTen;
 	private Date ngaySinh;
 	private String ngheNghiep;
 
-	public Nguoi() {
+	public NguoiDan() {
 
 	}
 
-	public Nguoi(String hoTen, Date ngaySinh, String ngheNghiep) {
+	public NguoiDan(String hoTen, Date ngaySinh, String ngheNghiep) {
 		this.hoTen = hoTen;
 		this.ngaySinh = ngaySinh;
 		this.ngheNghiep = ngheNghiep;
