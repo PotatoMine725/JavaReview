@@ -1,10 +1,11 @@
+
 import java.util.Scanner;
 
 /**
  *
  * @author Wotbl
  */
-public class Bai8 {
+public class Bai9 {
 
     /**
      * @param args the command line arguments
@@ -16,9 +17,10 @@ public class Bai8 {
 
 		ql111.nhapDanhSach(sc);
 
-		System.out.println("Danh sach nhung can bo co luong >= 8 trieu la:");
-		ql111.timKiem(8000000);
+		System.out.println("Danh sach sinh vien tra sach vao cuoi thang:");
+		ql111.hienThiDanhSachTraCuoiThang();
 
 		sc.close();
-	} 
+    }
+    
 }
