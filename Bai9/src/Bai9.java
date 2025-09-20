@@ -1,15 +1,6 @@
-
 import java.util.Scanner;
+ class Bai9 {
 
-/**
- *
- * @author Wotbl
- */
-public class Bai9 {
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 

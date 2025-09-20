@@ -1,24 +1,18 @@
-
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class QuanLy {
-	// thuoc tinh
+
 	private ArrayList<CBGV> ds;
 
-	// phuong thuc
-	// ham khoi tao
 	public QuanLy() {
 		ds = new ArrayList<CBGV>(10);
 	}
 
-	// ham them can bo vao danh sach
 	public void themCBGV(CBGV canBo) {
 		ds.add(canBo);
 	}
 
-	// ham nhap vao danh sach
 	public void nhapDanhSach(Scanner sc) {
 		CBGV canBo;
 
@@ -35,14 +29,12 @@ public class QuanLy {
 		}
 	}
 
-	// ham hien thi danh sach
 	public void hienThiDanhSach() {
 		for (CBGV cb : ds) {
 			cb.hienThiThongTin();
 		}
 	}
 
-	// ham tim kiem
 	public void timKiem(double luong) {
 		for (CBGV cb : ds) {
 			if (cb.getLuongThucLinh() >= luong) {

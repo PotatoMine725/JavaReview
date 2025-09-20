@@ -1,15 +1,7 @@
-
 import java.util.Scanner;
 
-/**
- *
- * @author Wotbl
- */
 public class Bai10 {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
 
@@ -20,6 +12,5 @@ public class Bai10 {
 		ql.hienThiDanhSach();
 
 		sc.close();
-    }
-    
+    } 
 }
