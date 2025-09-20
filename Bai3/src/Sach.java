@@ -15,16 +15,15 @@ public class Sach extends TaiLieu {
     @Override
     public void nhapThongTin(Scanner sc) {
         super.nhapThongTin(sc);
-        System.out.print("Nhập tên tác giả: ");
+        System.out.print("Nhap ten tac gia: ");
         tenTacGia = sc.nextLine();
-        System.out.print("Nhập số trang: ");
+        System.out.print("Nhap so trang: ");
         soTrang = Integer.parseInt(sc.nextLine());
     }
     @Override
     public void hienThiThongTin() {
         super.hienThiThongTin();
-        System.out.println("Tên tác giả: " + tenTacGia);
-        System.out.println("Số trang: " + soTrang);
-    }
-    
+        System.out.println("Ten tac gia: " + tenTacGia);
+        System.out.println("So trang: " + soTrang);
+    }   
 }

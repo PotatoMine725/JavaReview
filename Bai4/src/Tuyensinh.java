@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -46,7 +45,6 @@ public class Tuyensinh {
 		}
 	}
 
-	// ham hien thi
 	public void hienThiDanhSach() {
 		int n = dsts.size();
 		for (int i = 0; i < n; i++) {
@@ -55,7 +53,6 @@ public class Tuyensinh {
 		}
 	}
 
-	// tim kiem thi sinh theo so bao danh
 	public void timKiemThisinh(int soBaoDanh) {
 		for (Thisinh ts : dsts) {
 			if (ts.getSoBD() == soBaoDanh) {

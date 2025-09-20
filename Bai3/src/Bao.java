@@ -14,16 +14,16 @@ public class Bao extends TaiLieu {
     @Override
     public void nhapThongTin(Scanner sc) {
         super.nhapThongTin(sc);
-        System.out.print("Nhập ngày phát hành: ");
+        System.out.print("Nhap ngay phat hanh: ");
         ngayPhatHanh = sc.nextLine();
-        System.out.print("Nhập số phát hành: ");
+        System.out.print("Nhap so phat hanh: ");
         soPhatHanh = sc.nextLine();
     }
     @Override
     public void hienThiThongTin() {
         super.hienThiThongTin();
-        System.out.println("Ngày phát hành: " + ngayPhatHanh);
-        System.out.println("Số phát hành: " + soPhatHanh);
+        System.out.println("Ngay phat hanh: " + ngayPhatHanh);
+        System.out.println("So phat hanh: " + soPhatHanh);
     }
     
 }

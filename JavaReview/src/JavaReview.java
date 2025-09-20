@@ -1,9 +1,6 @@
 import java.util.*;
 public class JavaReview {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         System.out.println("Nhap phan so 1: ");
         Phanso ps_111 = new Phanso();

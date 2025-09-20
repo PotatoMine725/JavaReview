@@ -13,18 +13,18 @@ public class TaiLieu {
         
     }
     public void nhapThongTin(Scanner sc) {
-        System.out.print("Nhập mã tài liệu: ");
+        System.out.print("Nhap ma tai lieu: ");
         maTaiLieu = sc.nextLine();
-        System.out.print("Nhập tên nhà xuất bản: ");
+        System.out.print("Nhap ten nha xuat ban: ");
         tenNhaXuatBan = sc.nextLine();
-        System.out.print("Nhập số bản phát hành: ");
+        System.out.print("Nhap so ban phat hanh: ");
         soBanPhatHanh = Integer.parseInt(sc.nextLine());
         
     }
     public void hienThiThongTin() {
-        System.out.println("Mã tài liệu: " + maTaiLieu);
-        System.out.println("Tên nhà xuất bản: " + tenNhaXuatBan);
-        System.out.println("Số bản phát hành: " + soBanPhatHanh);
+        System.out.println("Ma tai lieu: " + maTaiLieu);
+        System.out.println("Ten nha xuat ban: " + tenNhaXuatBan);
+        System.out.println("So ban phat hanh: " + soBanPhatHanh);
     }
     public String getMaTaiLieu() {
         return maTaiLieu;

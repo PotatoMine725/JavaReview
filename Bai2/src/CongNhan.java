@@ -9,12 +9,14 @@ public class CongNhan extends CanBo {
         super(hoTen, gioiTinh, ngaySinh, diaChi);
         this.bac = bac;
     }
+    @Override
     public void nhapThongTin() {
         super.nhapThongTin();
         Scanner sc = new Scanner(System.in);
         System.out.print("Nhap bac: ");
         bac = sc.nextLine();
     }
+    @Override
     public void hienThiThongTin() {
         super.hienThiThongTin();
         System.out.println("Bac: " + bac);

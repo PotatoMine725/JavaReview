@@ -7,9 +7,7 @@ public class KhachTro extends Nguoi {
 	private double giaPhong;
 
 	public KhachTro() {
-
 	}
-
 
 	public KhachTro(String hoTen, int CMND, int soNgayTro, String loaiPhong, double giaPhong) {
 		this.hoTen = hoTen;

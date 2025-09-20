@@ -18,18 +18,17 @@ public class QLHS {
 
 		System.out.print("Nhap vao so luong hoc sinh: ");
 		int n = sc.nextInt();
-
+                sc.nextLine();
 		System.out.println("Nhap thong tin cho hoc sinh trong danh sach:");
 		for (int i = 0; i < n; i++) {
 			System.out.println("\tHoc sinh thu " + (i + 1) + " la:");
 
 			hs = new HocSinh();
 			hs.nhapThongTin(sc);
-
 			themHS(hs);
 		}
 	}
-
+        
 	public void hienThiDanhSach() {
 		int n = dshs.size();
 		for (int i = 0; i < n; i++) {

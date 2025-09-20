@@ -1,4 +1,3 @@
-
 public class KhoiB extends KhoiA {
 
 	public KhoiB() {

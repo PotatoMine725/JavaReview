@@ -1,20 +1,16 @@
-
 import java.util.Scanner;
 
 public class Thisinh {
-	// thuoc tinh
+    
 	private int soBD;
 	private String hoTen;
 	private String diaChi;
 	private String dienUuTien;
 
-	// phuong thuc
-	// ham khoi tao khong doi so
 	public Thisinh() {
 
 	}
 
-	// ham khoi tao co doi so
 	public Thisinh(int soBD, String hoTen, String diaChi, String dienUuTien) {
 		this.soBD = soBD;
 		this.hoTen = hoTen;
@@ -22,7 +18,6 @@ public class Thisinh {
 		this.dienUuTien = dienUuTien;
 	}
 
-	// ham nhap
 	public void nhapThongTin(Scanner sc) {
 		System.out.print("\tNhap so bao danh: ");
 		soBD = sc.nextInt();
@@ -35,7 +30,6 @@ public class Thisinh {
 		dienUuTien = sc.nextLine();
 	}
 
-	// ham hien thi
 	public void hienThiThongTin() {
 		System.out.println("\tSo bao danh: " + soBD);
 		System.out.println("\tHo ten: " + hoTen);
@@ -43,7 +37,6 @@ public class Thisinh {
 		System.out.println("\tDien uu tien: " + dienUuTien);
 	}
 
-	// ham lay ra thong tin ve so bao danh
 	public int getSoBD() {
 		return soBD;
 	}
