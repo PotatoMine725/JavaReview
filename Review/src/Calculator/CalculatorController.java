@@ -2,20 +2,21 @@ package Calculator;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 
 public class CalculatorController {
     private CalculatorView view;
     private CalculatorModel model;
+    
+    // Biến lưu trữ biểu thức đang nhập (VD: "2 + ( 3 * 5 )")
+    private String bieuThuc = "";
+    private boolean daRaKetQua = false; // Cờ kiểm tra xem vừa tính xong chưa
 
-    private double soDau = 0;
-    private String toanTu = "";
-    private boolean startNewNumber = true; // Cờ để kiểm tra khi nào nhập số mới sau khi bấm phép tính
+    private DecimalFormat df = new DecimalFormat("#.##########");
 
     public CalculatorController(CalculatorView view, CalculatorModel model) {
         this.view = view;
         this.model = model;
-
-        // Gắn sự kiện cho các nút trong View
         this.view.addCalculationListener(new CalculatorListener());
     }
 
@@ -24,52 +25,58 @@ public class CalculatorController {
         public void actionPerformed(ActionEvent e) {
             String command = e.getActionCommand();
 
-            // Nếu người dùng bấm số
-            if (command.matches("[0-9]")) {
-                if (startNewNumber) {
-                    view.setDisplayText(command);
-                    startNewNumber = false;
-                } else {
-                    view.setDisplayText(view.getDisplayText() + command);
+            // 1. Nút XÓA HẾT (C)
+            if (command.equals("C")) {
+                bieuThuc = "";
+                view.setDisplayText("0");
+                view.setHistoryText("");
+            }
+            // 2. Nút XÓA 1 KÝ TỰ (Del)
+            else if (command.equals("Del")) {
+                if (!bieuThuc.isEmpty()) {
+                    bieuThuc = bieuThuc.substring(0, bieuThuc.length() - 1);
+                    view.setDisplayText(bieuThuc.isEmpty() ? "0" : bieuThuc);
                 }
-            } 
-            // Nếu người dùng bấm nút xóa (C)
-            else if (command.equals("C")) {
-                view.setDisplayText("");
-                soDau = 0;
-                toanTu = "";
-                startNewNumber = true;
-            } 
-            // Nếu người dùng bấm dấu bằng (=)
+            }
+            // 3. Nút BẰNG (=) - Gọi Model tính toán
             else if (command.equals("=")) {
-                if (toanTu.isEmpty()) return;
-                
                 try {
-                    double soSau = Double.parseDouble(view.getDisplayText());
-                    double ketQua = model.calculate(soDau, soSau, toanTu);
+                    // Hiển thị biểu thức đầy đủ lên dòng history
+                    view.setHistoryText(bieuThuc + " =");
                     
-                    // Kiểm tra nếu kết quả là số nguyên thì hiển thị kiểu int cho đẹp
-                    if (ketQua == (long) ketQua) {
-                        view.setDisplayText(String.format("%d", (long) ketQua));
-                    } else {
-                        view.setDisplayText(String.valueOf(ketQua));
-                    }
+                    double ketQua = model.calculate(bieuThuc);
+                    String ketQuaString = df.format(ketQua);
                     
-                    // Reset để chuẩn bị cho phép tính tiếp theo dựa trên kết quả này
-                    startNewNumber = true;
-                    toanTu = "";
-                } catch (ArithmeticException ex) {
-                    view.setDisplayText("Lỗi");
-                    startNewNumber = true;
+                    view.setDisplayText(ketQuaString);
+                    
+                    // Lưu kết quả làm đầu vào cho phép tính tiếp theo
+                    bieuThuc = ketQuaString;
+                    daRaKetQua = true;
+                    
+                } catch (Exception ex) {
+                    view.setDisplayText("Lỗi biểu thức");
+                    bieuThuc = "";
                 }
-            } 
-            // Nếu người dùng bấm các toán tử (+, -, *, /)
+            }
+            // 4. Các nút SỐ và TOÁN TỬ (+, -, *, /, (, ))
             else {
-                if (!view.getDisplayText().isEmpty()) {
-                    soDau = Double.parseDouble(view.getDisplayText());
-                    toanTu = command;
-                    startNewNumber = true;
+                // Nếu vừa ra kết quả mà người dùng bấm số -> Reset biểu thức mới
+                // Nếu vừa ra kết quả mà bấm toán tử -> Dùng kết quả cũ tính tiếp
+                if (daRaKetQua) {
+                    if (command.matches("[0-9]")) {
+                        bieuThuc = ""; 
+                    }
+                    daRaKetQua = false;
                 }
+                
+                // Tránh số 0 ở đầu (trừ khi là số thập phân 0.)
+                if (bieuThuc.equals("0") && !command.equals(".")) {
+                    bieuThuc = command;
+                } else {
+                    bieuThuc += command;
+                }
+                
+                view.setDisplayText(bieuThuc);
             }
         }
     }
