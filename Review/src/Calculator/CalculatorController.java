@@ -8,10 +8,8 @@ public class CalculatorController {
     private CalculatorView view;
     private CalculatorModel model;
     
-    // Biến lưu trữ biểu thức đang nhập (VD: "2 + ( 3 * 5 )")
     private String bieuThuc = "";
-    private boolean daRaKetQua = false; // Cờ kiểm tra xem vừa tính xong chưa
-
+    private boolean daRaKetQua = false;
     private DecimalFormat df = new DecimalFormat("#.##########");
 
     public CalculatorController(CalculatorView view, CalculatorModel model) {
@@ -25,57 +23,59 @@ public class CalculatorController {
         public void actionPerformed(ActionEvent e) {
             String command = e.getActionCommand();
 
-            // 1. Nút XÓA HẾT (C)
             if (command.equals("C")) {
                 bieuThuc = "";
                 view.setDisplayText("0");
                 view.setHistoryText("");
             }
-            // 2. Nút XÓA 1 KÝ TỰ (Del)
             else if (command.equals("Del")) {
                 if (!bieuThuc.isEmpty()) {
-                    bieuThuc = bieuThuc.substring(0, bieuThuc.length() - 1);
+                    // Xóa thông minh: nếu cuối là sqrt hoặc // thì xóa cả cụm
+                    if (bieuThuc.endsWith("sqrt")) {
+                        bieuThuc = bieuThuc.substring(0, bieuThuc.length() - 4);
+                    } else if (bieuThuc.endsWith("//")) {
+                        bieuThuc = bieuThuc.substring(0, bieuThuc.length() - 2);
+                    } else {
+                        bieuThuc = bieuThuc.substring(0, bieuThuc.length() - 1);
+                    }
                     view.setDisplayText(bieuThuc.isEmpty() ? "0" : bieuThuc);
                 }
             }
-            // 3. Nút BẰNG (=) - Gọi Model tính toán
             else if (command.equals("=")) {
                 try {
-                    // Hiển thị biểu thức đầy đủ lên dòng history
                     view.setHistoryText(bieuThuc + " =");
-                    
                     double ketQua = model.calculate(bieuThuc);
-                    String ketQuaString = df.format(ketQua);
                     
+                    // Làm đẹp kết quả: 5.0 -> 5
+                    String ketQuaString = df.format(ketQua);
                     view.setDisplayText(ketQuaString);
                     
-                    // Lưu kết quả làm đầu vào cho phép tính tiếp theo
                     bieuThuc = ketQuaString;
                     daRaKetQua = true;
-                    
                 } catch (Exception ex) {
-                    view.setDisplayText("Lỗi biểu thức");
+                    view.setDisplayText("Lỗi");
                     bieuThuc = "";
                 }
             }
-            // 4. Các nút SỐ và TOÁN TỬ (+, -, *, /, (, ))
             else {
-                // Nếu vừa ra kết quả mà người dùng bấm số -> Reset biểu thức mới
-                // Nếu vừa ra kết quả mà bấm toán tử -> Dùng kết quả cũ tính tiếp
+                // Nhập liệu
                 if (daRaKetQua) {
-                    if (command.matches("[0-9]")) {
+                    // Nếu nhập số hoặc hàm mới -> Reset. Nếu nhập toán tử -> Giữ kết quả để tính tiếp
+                    if (command.matches("[0-9]") || command.equals("π") || command.equals("e") || command.equals("√") || command.equals("(")) {
                         bieuThuc = ""; 
                     }
                     daRaKetQua = false;
                 }
                 
-                // Tránh số 0 ở đầu (trừ khi là số thập phân 0.)
-                if (bieuThuc.equals("0") && !command.equals(".")) {
-                    bieuThuc = command;
-                } else {
-                    bieuThuc += command;
-                }
+                // Chuyển đổi ký tự hiển thị sang ký tự Model hiểu
+                String textToAdd = command;
+                if (command.equals("√")) textToAdd = "sqrt";
                 
+                if (bieuThuc.equals("0") && !command.equals(".")) {
+                    bieuThuc = textToAdd;
+                } else {
+                    bieuThuc += textToAdd;
+                }
                 view.setDisplayText(bieuThuc);
             }
         }
