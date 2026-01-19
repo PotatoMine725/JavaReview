@@ -7,19 +7,11 @@ import java.util.List;
 public class CalculatorModel {
 
     public double calculate(String bieuThuc) throws Exception {
-        // --- BƯỚC 1: XỬ LÝ NHÂN NGẦM (Implicit Multiplication) ---
+        // --- BƯỚC 1: XỬ LÝ NHÂN NGẦM ---
         String processed = bieuThuc;
-        
-        // 1. Số đi liền với: (, π, e, s (sqrt) -> Thêm *
-        // VD: 2( -> 2*(, 2π -> 2*π
-        processed = processed.replaceAll("(?<=\\d)(?=[(πes])", "*");
-
-        // 2. Ngoặc đóng đi liền với: Số, (, π, e, s -> Thêm * // VD: )2 -> )*2 (FIXED), )( -> )*(
-        processed = processed.replaceAll("(?<=\\))(?=[\\d(πes])", "*");
-
-        // 3. Hằng số (π, e) đi liền với: Số, (, π, e, s -> Thêm *
-        // VD: π2 -> π*2
-        processed = processed.replaceAll("(?<=[πe])(?=[\\d(πes])", "*");
+        processed = processed.replaceAll("(?<=\\d)(?=[(πes])", "*"); // Số -> (
+        processed = processed.replaceAll("(?<=\\))(?=[\\d(πes])", "*"); // ) -> Số
+        processed = processed.replaceAll("(?<=[πe])(?=[\\d(πes])", "*"); // Hằng -> Số
 
         // --- BƯỚC 2: THAY THẾ HẰNG SỐ ---
         processed = processed.replace("π", String.valueOf(Math.PI));
@@ -35,10 +27,7 @@ public class CalculatorModel {
                              .replace("*", " * ")
                              .replace("/", " / "); 
         
-        // Khôi phục lại toán tử chia nguyên // (do bị tách ở trên)
         processed = processed.replace("/  /", "//"); 
-        
-        // Xóa khoảng trắng thừa
         processed = processed.replaceAll("\\s+", " ").trim();
 
         return danhGiaBieuThuc(processed);
@@ -48,31 +37,25 @@ public class CalculatorModel {
         String[] rawTokens = bieuThuc.split(" ");
         List<String> tokens = new ArrayList<>();
         
-        // --- BƯỚC 4: XỬ LÝ SỐ ÂM (UNARY MINUS) ---
+        // --- BƯỚC 4: XỬ LÝ SỐ ÂM ---
         for (int i = 0; i < rawTokens.length; i++) {
             String t = rawTokens[i];
             if (t.equals("-")) {
                 boolean isNegativeSign = false;
-                if (i == 0) {
-                    isNegativeSign = true; 
-                } else {
+                if (i == 0) isNegativeSign = true; 
+                else {
                     String prev = rawTokens[i-1];
                     if (laToanTu(prev) || prev.equals("(") || prev.equals("sqrt")) {
                         isNegativeSign = true;
                     }
                 }
-                
-                if (isNegativeSign) {
-                    tokens.add("NEG");
-                } else {
-                    tokens.add("-");
-                }
+                tokens.add(isNegativeSign ? "NEG" : "-");
             } else {
                 tokens.add(t);
             }
         }
 
-        // --- BƯỚC 5: THUẬT TOÁN SHUNTING-YARD ---
+        // --- BƯỚC 5: SHUNTING-YARD ---
         Stack<Double> nganXepSo = new Stack<>();
         Stack<String> nganXepToanTu = new Stack<>();
 
@@ -98,12 +81,8 @@ public class CalculatorModel {
             else if (laToanTu(pt) || pt.equals("NEG") || pt.equals("sqrt")) {
                 while (!nganXepToanTu.isEmpty() && 
                        doUuTien(pt) <= doUuTien(nganXepToanTu.peek())) {
-                    
-                    if ((pt.equals("^") || pt.equals("NEG")) && pt.equals(nganXepToanTu.peek())) {
-                        break;
-                    }
+                    if ((pt.equals("^") || pt.equals("NEG")) && pt.equals(nganXepToanTu.peek())) break;
                     if (nganXepToanTu.peek().equals("(")) break;
-                    
                     thucHienPhepTinh(nganXepSo, nganXepToanTu);
                 }
                 nganXepToanTu.push(pt);
@@ -122,8 +101,11 @@ public class CalculatorModel {
         String op = toanTu.pop();
         
         if (op.equals("sqrt")) {
-            if (so.isEmpty()) throw new ArithmeticException("Lỗi sqrt");
-            so.push(Math.sqrt(so.pop()));
+            if (so.isEmpty()) throw new ArithmeticException("Lỗi cú pháp");
+            double val = so.pop();
+            // [CẬP NHẬT] Kiểm tra số âm
+            if (val < 0) throw new ArithmeticException("Căn số âm");
+            so.push(Math.sqrt(val));
             return;
         }
         if (op.equals("NEG")) {
@@ -145,7 +127,8 @@ public class CalculatorModel {
                 so.push(soDau / soSau); break;
             case "//": 
                 if (soSau == 0) throw new ArithmeticException("Chia 0");
-                so.push((double)((long)(soDau / soSau))); break;
+                // [CẬP NHẬT] Dùng Math.floor để tránh tràn số long
+                so.push(Math.floor(soDau / soSau)); break;
             case "^": so.push(Math.pow(soDau, soSau)); break;
         }
     }
