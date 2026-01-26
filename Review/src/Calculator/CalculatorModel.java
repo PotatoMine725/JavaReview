@@ -5,35 +5,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CalculatorModel {
+    
+    private boolean isDegree = false;
+    private double ans = 0; // Biến lưu kết quả trước đó
+
+    public void setDegreeMode(boolean isDegree) {
+        this.isDegree = isDegree;
+    }
+
+    // Hàm cập nhật Ans
+    public void setAns(double value) {
+        this.ans = value;
+    }
 
     public double calculate(String bieuThuc) throws Exception {
-        // --- BƯỚC 1: XỬ LÝ NHÂN NGẦM ---
         String processed = bieuThuc;
         
-        // Regex nhận diện ký tự đầu của các hàm/hằng số:
-        // ( = ngoặc mở
-        // π, e = hằng số
-        // s = sqrt, sin
-        // c = cos
-        // t = tan
-        // l = log, ln
-        String funcStart = "[(πesctl]"; 
+        // Regex nhận diện ký tự đầu của: ( , π, e, s(sin/sqrt), c(cos), t(tan), l(log/ln), A(Ans)
+        String funcStart = "[(πesctlA]"; 
 
-        // 1. Số + [Hàm/Ngoặc/Hằng] -> Thêm * (VD: 2sin -> 2*sin)
+        // 1. Xử lý nhân ngầm: Thêm * vào trước/sau các hàm/biến
+        // VD: 2Ans -> 2*Ans, Ans( -> Ans*(
         processed = processed.replaceAll("(?<=\\d)(?=" + funcStart + ")", "*"); 
-        
-        // 2. Ngoặc đóng + [Số/Hàm/Ngoặc/Hằng] -> Thêm * (VD: )sin -> )*sin)
         processed = processed.replaceAll("(?<=\\))(?=[\\d" + funcStart + "])", "*"); 
-        
-        // 3. Hằng số + [Số/Hàm/Ngoặc/Hằng] -> Thêm * (VD: πsin -> π*sin)
-        processed = processed.replaceAll("(?<=[πe])(?=[\\d" + funcStart + "])", "*");
+        processed = processed.replaceAll("(?<=[πeA])(?=[\\d" + funcStart + "])", "*"); // A là Ans
 
-        // --- BƯỚC 2: THAY THẾ HẰNG SỐ ---
+        // 2. Thay thế Hằng số & Ans
+        // Ans được thay bằng (value) để đảm bảo an toàn cho số âm. VD: Ans=-5 -> (-5.0)
+        // Điều này giúp Ans^2 thành (-5.0)^2 = 25 (đúng), thay vì -5.0^2 = -25 (sai)
+        processed = processed.replace("Ans", "(" + String.valueOf(ans) + ")");
         processed = processed.replace("π", String.valueOf(Math.PI));
         processed = processed.replace("e", String.valueOf(Math.E));
 
-        // --- BƯỚC 3: CHUẨN HÓA TOÁN TỬ ---
-        // Tách các hàm ra để dễ split
+        // 3. Chuẩn hóa toán tử
         processed = processed.replace("sin", " sin ")
                              .replace("cos", " cos ")
                              .replace("tan", " tan ")
@@ -58,7 +62,6 @@ public class CalculatorModel {
         String[] rawTokens = bieuThuc.split(" ");
         List<String> tokens = new ArrayList<>();
         
-        // --- BƯỚC 4: XỬ LÝ SỐ ÂM ---
         for (int i = 0; i < rawTokens.length; i++) {
             String t = rawTokens[i];
             if (t.equals("-")) {
@@ -66,7 +69,6 @@ public class CalculatorModel {
                 if (i == 0) isNegativeSign = true; 
                 else {
                     String prev = rawTokens[i-1];
-                    // Nếu trước nó là toán tử hoặc ( hoặc TÊN HÀM -> là dấu âm
                     if (laToanTu(prev) || prev.equals("(") || isFunction(prev)) {
                         isNegativeSign = true;
                     }
@@ -77,7 +79,6 @@ public class CalculatorModel {
             }
         }
 
-        // --- BƯỚC 5: SHUNTING-YARD ---
         Stack<Double> nganXepSo = new Stack<>();
         Stack<String> nganXepToanTu = new Stack<>();
 
@@ -86,24 +87,18 @@ public class CalculatorModel {
 
             if (laSo(pt)) {
                 nganXepSo.push(Double.parseDouble(pt));
-            } 
-            else if (pt.equals("(")) {
+            } else if (pt.equals("(")) {
                 nganXepToanTu.push(pt);
-            } 
-            else if (pt.equals(")")) {
+            } else if (pt.equals(")")) {
                 while (!nganXepToanTu.isEmpty() && !nganXepToanTu.peek().equals("(")) {
                     thucHienPhepTinh(nganXepSo, nganXepToanTu);
                 }
                 if (!nganXepToanTu.isEmpty()) nganXepToanTu.pop(); 
-                
-                // Nếu sau khi đóng ngoặc có hàm chờ sẵn (VD: sin(30)) -> Tính luôn
                 if (!nganXepToanTu.isEmpty() && isFunction(nganXepToanTu.peek())) {
                     thucHienPhepTinh(nganXepSo, nganXepToanTu);
                 }
-            } 
-            else if (laToanTu(pt) || pt.equals("NEG") || isFunction(pt)) {
-                while (!nganXepToanTu.isEmpty() && 
-                       doUuTien(pt) <= doUuTien(nganXepToanTu.peek())) {
+            } else if (laToanTu(pt) || pt.equals("NEG") || isFunction(pt)) {
+                while (!nganXepToanTu.isEmpty() && doUuTien(pt) <= doUuTien(nganXepToanTu.peek())) {
                     if ((pt.equals("^") || pt.equals("NEG")) && pt.equals(nganXepToanTu.peek())) break;
                     if (nganXepToanTu.peek().equals("(")) break;
                     thucHienPhepTinh(nganXepSo, nganXepToanTu);
@@ -123,30 +118,41 @@ public class CalculatorModel {
     private void thucHienPhepTinh(Stack<Double> so, Stack<String> toanTu) {
         String op = toanTu.pop();
         
-        // --- XỬ LÝ CÁC HÀM 1 NGÔI ---
         if (isFunction(op) || op.equals("NEG")) {
-            if (so.isEmpty()) throw new ArithmeticException("Lỗi cú pháp hàm");
+            if (so.isEmpty()) throw new ArithmeticException("Lỗi cú pháp");
             double val = so.pop();
 
             switch (op) {
                 case "sqrt":
                     if (val < 0) throw new ArithmeticException("Căn số âm");
                     so.push(Math.sqrt(val)); break;
-                case "sin": so.push(Math.sin(val)); break; // Input là Radian
-                case "cos": so.push(Math.cos(val)); break;
-                case "tan": so.push(Math.tan(val)); break;
+                case "sin": 
+                    if (isDegree) val = Math.toRadians(val);
+                    double sinVal = Math.sin(val);
+                    if (Math.abs(sinVal) < 1e-10) sinVal = 0; 
+                    so.push(sinVal); break;
+                case "cos": 
+                    if (isDegree) val = Math.toRadians(val);
+                    double cosVal = Math.cos(val);
+                    if (Math.abs(cosVal) < 1e-10) cosVal = 0;
+                    so.push(cosVal); break;
+                case "tan": 
+                    if (isDegree) {
+                        if (val % 180 == 90 || val % 180 == -90) throw new ArithmeticException("Tan lỗi");
+                        val = Math.toRadians(val);
+                    }
+                    so.push(Math.tan(val)); break;
                 case "log": 
-                    if (val <= 0) throw new ArithmeticException("Log lỗi miền");
+                    if (val <= 0) throw new ArithmeticException("Lỗi miền");
                     so.push(Math.log10(val)); break;
                 case "ln": 
-                    if (val <= 0) throw new ArithmeticException("Ln lỗi miền");
+                    if (val <= 0) throw new ArithmeticException("Lỗi miền");
                     so.push(Math.log(val)); break;
                 case "NEG": so.push(-val); break;
             }
             return;
         }
 
-        // --- XỬ LÝ TOÁN TỬ 2 NGÔI ---
         if (so.size() < 2) throw new ArithmeticException("Lỗi toán hạng");
         double soSau = so.pop();
         double soDau = so.pop();
@@ -168,18 +174,10 @@ public class CalculatorModel {
     private boolean laSo(String s) {
         try { Double.parseDouble(s); return true; } catch (Exception e) { return false; }
     }
-
-    // Kiểm tra xem token có phải là hàm toán học không
-    private boolean isFunction(String s) {
-        return s.matches("sqrt|sin|cos|tan|log|ln");
-    }
-
-    private boolean laToanTu(String s) {
-        return s.matches("\\/\\/|\\^|[+\\-*/]");
-    }
-
+    private boolean isFunction(String s) { return s.matches("sqrt|sin|cos|tan|log|ln"); }
+    private boolean laToanTu(String s) { return s.matches("\\/\\/|\\^|[+\\-*/]"); }
     private int doUuTien(String op) {
-        if (isFunction(op)) return 5; // Hàm ưu tiên cao nhất
+        if (isFunction(op)) return 5;
         if (op.equals("NEG")) return 4;
         if (op.equals("^")) return 3;
         if (op.equals("*") || op.equals("/") || op.equals("//")) return 2;

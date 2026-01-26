@@ -7,22 +7,22 @@ import java.awt.event.ActionListener;
 public class CalculatorView extends JFrame {
     private JLabel lblHistory;
     private JLabel lblDisplay;
+    private JButton btnMode; 
     private JButton[] buttons;
     
-    // Cập nhật danh sách nút: Thêm sin, cos, tan, log, ln vào hàng đầu
-    // Bố cục 6 dòng x 5 cột
+    // Cập nhật: Thay nút "//" bằng "Ans" ở hàng 4
     private String[] buttonLabels = {
-        "sin", "cos", "tan", "log", "ln",  // Hàng mới
+        "sin", "cos", "tan", "log", "ln",
         "√",   "^",   "(",   ")",   "C",
         "7",   "8",   "9",   "/",   "Del",
-        "4",   "5",   "6",   "*",   "//",
+        "4",   "5",   "6",   "*",   "Ans", // Thay // bằng Ans
         "1",   "2",   "3",   "-",   "π",
         "0",   ".",   "=",   "+",   "e"
     };
 
     public CalculatorView() {
         setTitle("Máy tính Khoa học");
-        setSize(420, 600); // Tăng chiều cao để chứa thêm hàng nút
+        setSize(420, 630);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -49,9 +49,25 @@ public class CalculatorView extends JFrame {
         containerScreen.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         add(containerScreen, BorderLayout.NORTH);
 
+        // --- THANH CÔNG CỤ (MODE) ---
+        JPanel pnlToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        pnlToolbar.setBackground(new Color(245, 245, 245));
+        
+        btnMode = new JButton("Rad");
+        btnMode.setFont(new Font("Arial", Font.BOLD, 12));
+        btnMode.setBackground(Color.LIGHT_GRAY);
+        btnMode.setFocusPainted(false);
+        btnMode.setPreferredSize(new Dimension(60, 25));
+        
+        pnlToolbar.add(new JLabel("Mode: "));
+        pnlToolbar.add(btnMode);
+        
+        JPanel pnlBody = new JPanel(new BorderLayout());
+        pnlBody.add(pnlToolbar, BorderLayout.NORTH);
+        
         // --- BÀN PHÍM ---
         JPanel panelButtons = new JPanel();
-        panelButtons.setLayout(new GridLayout(6, 5, 8, 8)); // 6 dòng, 5 cột
+        panelButtons.setLayout(new GridLayout(6, 5, 8, 8));
         panelButtons.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
         buttons = new JButton[buttonLabels.length];
@@ -63,36 +79,52 @@ public class CalculatorView extends JFrame {
             
             String label = buttonLabels[i];
             
-            // Tô màu các nhóm nút
             if (label.equals("C")) {
-                buttons[i].setBackground(new Color(255, 100, 100)); // Đỏ
+                buttons[i].setBackground(new Color(255, 100, 100));
                 buttons[i].setForeground(Color.WHITE);
             } else if (label.equals("=")) {
-                buttons[i].setBackground(new Color(0, 150, 255)); // Xanh dương
+                buttons[i].setBackground(new Color(0, 150, 255));
                 buttons[i].setForeground(Color.WHITE);
             } else if (label.equals("Del")) {
-                buttons[i].setBackground(new Color(255, 160, 0)); // Cam
+                buttons[i].setBackground(new Color(255, 160, 0));
                 buttons[i].setForeground(Color.WHITE);
             } else if ("0123456789.".contains(label)) {
-                buttons[i].setBackground(Color.WHITE); // Số
+                buttons[i].setBackground(Color.WHITE);
                 buttons[i].setFont(new Font("Arial", Font.BOLD, 22));
+            } else if (label.equals("Ans")) {
+                buttons[i].setBackground(new Color(100, 200, 100)); // Màu xanh lá cho Ans
+                buttons[i].setForeground(Color.WHITE);
             } else if (label.matches("sin|cos|tan|log|ln|√|\\^|\\(|\\)|π|e")) {
-                 buttons[i].setBackground(new Color(220, 240, 255)); // Màu xanh nhạt cho hàm
+                 buttons[i].setBackground(new Color(220, 240, 255));
             } else {
-                buttons[i].setBackground(new Color(230, 230, 230)); // Toán tử cơ bản
+                buttons[i].setBackground(new Color(230, 230, 230));
             }
             
             panelButtons.add(buttons[i]);
         }
-
-        add(panelButtons, BorderLayout.CENTER);
+        
+        pnlBody.add(panelButtons, BorderLayout.CENTER);
+        add(pnlBody, BorderLayout.CENTER);
     }
 
     public String getDisplayText() { return lblDisplay.getText(); }
     public void setDisplayText(String text) { lblDisplay.setText(text); }
     public void setHistoryText(String text) { lblHistory.setText(text); }
     
+    public void updateModeButton(boolean isDegree) {
+        if (isDegree) {
+            btnMode.setText("Deg");
+            btnMode.setBackground(new Color(255, 200, 100));
+        } else {
+            btnMode.setText("Rad");
+            btnMode.setBackground(Color.LIGHT_GRAY);
+        }
+    }
+
     public void addCalculationListener(ActionListener listener) {
         for (JButton btn : buttons) btn.addActionListener(listener);
+    }
+    public void addModeListener(ActionListener listener) {
+        btnMode.addActionListener(listener);
     }
 }
