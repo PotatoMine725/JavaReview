@@ -9,16 +9,37 @@ public class CalculatorModel {
     public double calculate(String bieuThuc) throws Exception {
         // --- BƯỚC 1: XỬ LÝ NHÂN NGẦM ---
         String processed = bieuThuc;
-        processed = processed.replaceAll("(?<=\\d)(?=[(πes])", "*"); // Số -> (
-        processed = processed.replaceAll("(?<=\\))(?=[\\d(πes])", "*"); // ) -> Số
-        processed = processed.replaceAll("(?<=[πe])(?=[\\d(πes])", "*"); // Hằng -> Số
+        
+        // Regex nhận diện ký tự đầu của các hàm/hằng số:
+        // ( = ngoặc mở
+        // π, e = hằng số
+        // s = sqrt, sin
+        // c = cos
+        // t = tan
+        // l = log, ln
+        String funcStart = "[(πesctl]"; 
+
+        // 1. Số + [Hàm/Ngoặc/Hằng] -> Thêm * (VD: 2sin -> 2*sin)
+        processed = processed.replaceAll("(?<=\\d)(?=" + funcStart + ")", "*"); 
+        
+        // 2. Ngoặc đóng + [Số/Hàm/Ngoặc/Hằng] -> Thêm * (VD: )sin -> )*sin)
+        processed = processed.replaceAll("(?<=\\))(?=[\\d" + funcStart + "])", "*"); 
+        
+        // 3. Hằng số + [Số/Hàm/Ngoặc/Hằng] -> Thêm * (VD: πsin -> π*sin)
+        processed = processed.replaceAll("(?<=[πe])(?=[\\d" + funcStart + "])", "*");
 
         // --- BƯỚC 2: THAY THẾ HẰNG SỐ ---
         processed = processed.replace("π", String.valueOf(Math.PI));
         processed = processed.replace("e", String.valueOf(Math.E));
 
         // --- BƯỚC 3: CHUẨN HÓA TOÁN TỬ ---
-        processed = processed.replace("sqrt", " sqrt ")
+        // Tách các hàm ra để dễ split
+        processed = processed.replace("sin", " sin ")
+                             .replace("cos", " cos ")
+                             .replace("tan", " tan ")
+                             .replace("log", " log ")
+                             .replace("ln", " ln ")
+                             .replace("sqrt", " sqrt ")
                              .replace("^", " ^ ")
                              .replace("(", " ( ")
                              .replace(")", " ) ")
@@ -45,7 +66,8 @@ public class CalculatorModel {
                 if (i == 0) isNegativeSign = true; 
                 else {
                     String prev = rawTokens[i-1];
-                    if (laToanTu(prev) || prev.equals("(") || prev.equals("sqrt")) {
+                    // Nếu trước nó là toán tử hoặc ( hoặc TÊN HÀM -> là dấu âm
+                    if (laToanTu(prev) || prev.equals("(") || isFunction(prev)) {
                         isNegativeSign = true;
                     }
                 }
@@ -74,11 +96,12 @@ public class CalculatorModel {
                 }
                 if (!nganXepToanTu.isEmpty()) nganXepToanTu.pop(); 
                 
-                if (!nganXepToanTu.isEmpty() && nganXepToanTu.peek().equals("sqrt")) {
+                // Nếu sau khi đóng ngoặc có hàm chờ sẵn (VD: sin(30)) -> Tính luôn
+                if (!nganXepToanTu.isEmpty() && isFunction(nganXepToanTu.peek())) {
                     thucHienPhepTinh(nganXepSo, nganXepToanTu);
                 }
             } 
-            else if (laToanTu(pt) || pt.equals("NEG") || pt.equals("sqrt")) {
+            else if (laToanTu(pt) || pt.equals("NEG") || isFunction(pt)) {
                 while (!nganXepToanTu.isEmpty() && 
                        doUuTien(pt) <= doUuTien(nganXepToanTu.peek())) {
                     if ((pt.equals("^") || pt.equals("NEG")) && pt.equals(nganXepToanTu.peek())) break;
@@ -100,20 +123,30 @@ public class CalculatorModel {
     private void thucHienPhepTinh(Stack<Double> so, Stack<String> toanTu) {
         String op = toanTu.pop();
         
-        if (op.equals("sqrt")) {
-            if (so.isEmpty()) throw new ArithmeticException("Lỗi cú pháp");
+        // --- XỬ LÝ CÁC HÀM 1 NGÔI ---
+        if (isFunction(op) || op.equals("NEG")) {
+            if (so.isEmpty()) throw new ArithmeticException("Lỗi cú pháp hàm");
             double val = so.pop();
-            // [CẬP NHẬT] Kiểm tra số âm
-            if (val < 0) throw new ArithmeticException("Căn số âm");
-            so.push(Math.sqrt(val));
-            return;
-        }
-        if (op.equals("NEG")) {
-            if (so.isEmpty()) throw new ArithmeticException("Lỗi dấu âm");
-            so.push(-so.pop());
+
+            switch (op) {
+                case "sqrt":
+                    if (val < 0) throw new ArithmeticException("Căn số âm");
+                    so.push(Math.sqrt(val)); break;
+                case "sin": so.push(Math.sin(val)); break; // Input là Radian
+                case "cos": so.push(Math.cos(val)); break;
+                case "tan": so.push(Math.tan(val)); break;
+                case "log": 
+                    if (val <= 0) throw new ArithmeticException("Log lỗi miền");
+                    so.push(Math.log10(val)); break;
+                case "ln": 
+                    if (val <= 0) throw new ArithmeticException("Ln lỗi miền");
+                    so.push(Math.log(val)); break;
+                case "NEG": so.push(-val); break;
+            }
             return;
         }
 
+        // --- XỬ LÝ TOÁN TỬ 2 NGÔI ---
         if (so.size() < 2) throw new ArithmeticException("Lỗi toán hạng");
         double soSau = so.pop();
         double soDau = so.pop();
@@ -127,7 +160,6 @@ public class CalculatorModel {
                 so.push(soDau / soSau); break;
             case "//": 
                 if (soSau == 0) throw new ArithmeticException("Chia 0");
-                // [CẬP NHẬT] Dùng Math.floor để tránh tràn số long
                 so.push(Math.floor(soDau / soSau)); break;
             case "^": so.push(Math.pow(soDau, soSau)); break;
         }
@@ -137,12 +169,17 @@ public class CalculatorModel {
         try { Double.parseDouble(s); return true; } catch (Exception e) { return false; }
     }
 
+    // Kiểm tra xem token có phải là hàm toán học không
+    private boolean isFunction(String s) {
+        return s.matches("sqrt|sin|cos|tan|log|ln");
+    }
+
     private boolean laToanTu(String s) {
-        return s.matches("sqrt|\\/\\/|\\^|[+\\-*/]|NEG");
+        return s.matches("\\/\\/|\\^|[+\\-*/]");
     }
 
     private int doUuTien(String op) {
-        if (op.equals("sqrt")) return 5;
+        if (isFunction(op)) return 5; // Hàm ưu tiên cao nhất
         if (op.equals("NEG")) return 4;
         if (op.equals("^")) return 3;
         if (op.equals("*") || op.equals("/") || op.equals("//")) return 2;

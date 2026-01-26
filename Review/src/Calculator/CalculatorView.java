@@ -9,9 +9,10 @@ public class CalculatorView extends JFrame {
     private JLabel lblDisplay;
     private JButton[] buttons;
     
-    // Cập nhật danh sách nút: Thêm √, ^, //, π, e
-    // Bố cục 5 cột x 5 hàng
+    // Cập nhật danh sách nút: Thêm sin, cos, tan, log, ln vào hàng đầu
+    // Bố cục 6 dòng x 5 cột
     private String[] buttonLabels = {
+        "sin", "cos", "tan", "log", "ln",  // Hàng mới
         "√",   "^",   "(",   ")",   "C",
         "7",   "8",   "9",   "/",   "Del",
         "4",   "5",   "6",   "*",   "//",
@@ -21,7 +22,7 @@ public class CalculatorView extends JFrame {
 
     public CalculatorView() {
         setTitle("Máy tính Khoa học");
-        setSize(400, 550); // Tăng kích thước bề ngang và dọc
+        setSize(420, 600); // Tăng chiều cao để chứa thêm hàng nút
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -50,7 +51,7 @@ public class CalculatorView extends JFrame {
 
         // --- BÀN PHÍM ---
         JPanel panelButtons = new JPanel();
-        panelButtons.setLayout(new GridLayout(5, 5, 8, 8)); // 5 dòng, 5 cột
+        panelButtons.setLayout(new GridLayout(6, 5, 8, 8)); // 6 dòng, 5 cột
         panelButtons.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
         buttons = new JButton[buttonLabels.length];
@@ -73,10 +74,12 @@ public class CalculatorView extends JFrame {
                 buttons[i].setBackground(new Color(255, 160, 0)); // Cam
                 buttons[i].setForeground(Color.WHITE);
             } else if ("0123456789.".contains(label)) {
-                buttons[i].setBackground(Color.WHITE); // Số màu trắng
-                buttons[i].setFont(new Font("Arial", Font.BOLD, 22)); // Số to hơn chút
+                buttons[i].setBackground(Color.WHITE); // Số
+                buttons[i].setFont(new Font("Arial", Font.BOLD, 22));
+            } else if (label.matches("sin|cos|tan|log|ln|√|\\^|\\(|\\)|π|e")) {
+                 buttons[i].setBackground(new Color(220, 240, 255)); // Màu xanh nhạt cho hàm
             } else {
-                buttons[i].setBackground(new Color(230, 230, 230)); // Các nút chức năng màu xám nhẹ
+                buttons[i].setBackground(new Color(230, 230, 230)); // Toán tử cơ bản
             }
             
             panelButtons.add(buttons[i]);
