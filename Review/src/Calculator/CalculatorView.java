@@ -10,18 +10,18 @@ public class CalculatorView extends JFrame {
     private JButton btnMode; 
     private JButton[] buttons;
     
-    // Cập nhật: Thay nút "//" bằng "Ans" ở hàng 4
+    // Cập nhật: Thay nút "e" bằng "x" ở góc dưới cùng bên phải
     private String[] buttonLabels = {
         "sin", "cos", "tan", "log", "ln",
         "√",   "^",   "(",   ")",   "C",
         "7",   "8",   "9",   "/",   "Del",
-        "4",   "5",   "6",   "*",   "Ans", // Thay // bằng Ans
+        "4",   "5",   "6",   "*",   "Ans",
         "1",   "2",   "3",   "-",   "π",
-        "0",   ".",   "=",   "+",   "e"
+        "0",   ".",   "=",   "+",   "x"  // Thay e bằng x
     };
 
     public CalculatorView() {
-        setTitle("Máy tính Khoa học");
+        setTitle("Máy tính Bỏ túi");
         setSize(420, 630);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -49,7 +49,7 @@ public class CalculatorView extends JFrame {
         containerScreen.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
         add(containerScreen, BorderLayout.NORTH);
 
-        // --- THANH CÔNG CỤ (MODE) ---
+        // --- TOOLBAR ---
         JPanel pnlToolbar = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pnlToolbar.setBackground(new Color(245, 245, 245));
         
@@ -65,7 +65,7 @@ public class CalculatorView extends JFrame {
         JPanel pnlBody = new JPanel(new BorderLayout());
         pnlBody.add(pnlToolbar, BorderLayout.NORTH);
         
-        // --- BÀN PHÍM ---
+        // --- BUTTONS ---
         JPanel panelButtons = new JPanel();
         panelButtons.setLayout(new GridLayout(6, 5, 8, 8));
         panelButtons.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -92,9 +92,13 @@ public class CalculatorView extends JFrame {
                 buttons[i].setBackground(Color.WHITE);
                 buttons[i].setFont(new Font("Arial", Font.BOLD, 22));
             } else if (label.equals("Ans")) {
-                buttons[i].setBackground(new Color(100, 200, 100)); // Màu xanh lá cho Ans
+                buttons[i].setBackground(new Color(100, 200, 100)); 
                 buttons[i].setForeground(Color.WHITE);
-            } else if (label.matches("sin|cos|tan|log|ln|√|\\^|\\(|\\)|π|e")) {
+            } else if (label.equals("x")) {
+                buttons[i].setBackground(new Color(255, 100, 255)); // Màu tím cho x
+                buttons[i].setForeground(Color.WHITE);
+                buttons[i].setFont(new Font("Arial", Font.ITALIC | Font.BOLD, 20));
+            } else if (label.matches("sin|cos|tan|log|ln|√|\\^|\\(|\\)|π")) {
                  buttons[i].setBackground(new Color(220, 240, 255));
             } else {
                 buttons[i].setBackground(new Color(230, 230, 230));

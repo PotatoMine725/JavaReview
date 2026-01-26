@@ -16,7 +16,6 @@ public class CalculatorController {
     public CalculatorController(CalculatorView view, CalculatorModel model) {
         this.view = view;
         this.model = model;
-        
         this.view.addCalculationListener(new CalculatorListener());
         this.view.addModeListener(e -> {
             isDegree = !isDegree;
@@ -37,7 +36,6 @@ public class CalculatorController {
             }
             else if (command.equals("Del")) {
                 if (!bieuThuc.isEmpty()) {
-                    // Xóa Ans (3 ký tự)
                     if (bieuThuc.endsWith("Ans") || bieuThuc.endsWith("sin") || 
                         bieuThuc.endsWith("cos") || bieuThuc.endsWith("tan") || 
                         bieuThuc.endsWith("log")) {
@@ -54,38 +52,43 @@ public class CalculatorController {
             }
             else if (command.equals("=")) {
                 try {
-                    view.setHistoryText(bieuThuc + " =");
-                    double ketQua = model.calculate(bieuThuc);
-                    
-                    if (Double.isInfinite(ketQua) || Double.isNaN(ketQua)) {
-                        view.setDisplayText("Lỗi");
-                        bieuThuc = ""; 
-                    } else {
-                        String ketQuaString = df.format(ketQua);
+                    // --- CASE 1: GIẢI PHƯƠNG TRÌNH (Chứa x) ---
+                    if (bieuThuc.contains("x")) {
+                        view.setHistoryText("Solve: " + bieuThuc + " = 0");
+                        
+                        // Gọi hàm mới solveEquation (trả về String)
+                        String ketQuaString = model.solveEquation(bieuThuc);
+                        
                         view.setDisplayText(ketQuaString);
-                        
-                        // Cập nhật Ans trong Model
-                        model.setAns(ketQua);
-                        
-                        bieuThuc = ketQuaString;
+                        // Không lưu Ans khi giải phương trình
                         daRaKetQua = true;
+                    } 
+                    // --- CASE 2: TÍNH TOÁN THƯỜNG ---
+                    else {
+                        view.setHistoryText(bieuThuc + " =");
+                        double ketQua = model.calculate(bieuThuc);
+                        
+                        if (Double.isInfinite(ketQua) || Double.isNaN(ketQua)) {
+                            view.setDisplayText("Lỗi");
+                            bieuThuc = ""; 
+                        } else {
+                            String ketQuaString = df.format(ketQua);
+                            view.setDisplayText(ketQuaString);
+                            model.setAns(ketQua);
+                            bieuThuc = ketQuaString;
+                            daRaKetQua = true;
+                        }
                     }
                 } catch (Exception ex) {
-                    view.setDisplayText("Lỗi");
-                    bieuThuc = "";
+                    view.setDisplayText(ex.getMessage() != null ? ex.getMessage() : "Lỗi");
+                    // bieuThuc = ""; // Có thể giữ lại biểu thức để user sửa
                 }
             }
             else {
+                // ... (Logic nhập liệu giữ nguyên như cũ) ...
                 if (daRaKetQua) {
-                    // Nếu bấm Ans sau khi ra kết quả -> Bắt đầu phép tính mới với Ans
-                    if (command.equals("Ans")) {
-                        bieuThuc = "";
-                    }
-                    // Nếu nhập số, hằng, hàm -> Reset
-                    else if (command.matches("[0-9]") || command.matches("π|e|√|\\(|sin|cos|tan|log|ln")) {
-                        bieuThuc = ""; 
-                    }
-                    // Nếu nhập toán tử -> Giữ kết quả cũ
+                    if (command.equals("Ans")) bieuThuc = "Ans";
+                    else if (command.matches("[0-9]") || command.matches("π|e|√|\\(|sin|cos|tan|log|ln|x")) bieuThuc = ""; 
                     daRaKetQua = false;
                 }
 
@@ -101,7 +104,6 @@ public class CalculatorController {
                 
                 String textToAdd = command;
                 if (command.equals("√")) textToAdd = "sqrt";
-                // Ans, sin, cos... giữ nguyên
                 
                 boolean isOperator = command.matches("[+\\-*/^]") || command.equals("//");
                 boolean isDot = command.equals(".");
