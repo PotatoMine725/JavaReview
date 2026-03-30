@@ -224,7 +224,21 @@ public class ChatClientGUI {
 
     private void connectToServer() {
         try {
-            socket = new Socket("localhost", 9999);
+            // THAY ĐỔI: Cho phép nhập địa chỉ IP server
+            String serverIP = JOptionPane.showInputDialog(null,
+                    "Nhập địa chỉ IP của Server:\n(Để trống = localhost)",
+                    "Kết nối Server",
+                    JOptionPane.QUESTION_MESSAGE);
+            
+            // Nếu không nhập gì hoặc nhấn Cancel, dùng localhost
+            if (serverIP == null || serverIP.trim().isEmpty()) {
+                serverIP = "localhost";
+            } else {
+                serverIP = serverIP.trim();
+            }
+            
+            // Kết nối đến server với IP đã nhập
+            socket = new Socket(serverIP, 9999);
             dis = new DataInputStream(socket.getInputStream());
             dos = new DataOutputStream(socket.getOutputStream());
 
